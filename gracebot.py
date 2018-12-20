@@ -10,9 +10,10 @@ def generateSentence(screen_name, seedword = "my", times = 10, maxwords = 1000):
     # Get rid of <SOS> start of string
     payload = [txt[5:] for txt in payload]
     grdic = makedic(payload)
+    print()
     for _ in range(times):
         makeSentence(grdic,seedword, maxwords)
-        print()
+        print("\n")
 
 def makedic(payload, key_length = 2):
     grdic = {}
@@ -31,7 +32,7 @@ def printOptions(grdic, inp):
     print(inp)
     for ind,(key,value) in enumerate(grdic[inp].items()):
         sys.stdout.write(key + " ")
-        
+
 def makeSentence(grdic, startseed, numwords):
     # Makes full sentence
     sys.stdout.write(startseed)
