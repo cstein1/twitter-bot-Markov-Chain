@@ -21,8 +21,11 @@ def get_all_tweets(screen_name, consumer_key, consumer_secret, access_key, acces
     #save most recent tweets
     alltweets.extend(new_tweets)
 
-    #save the id of the oldest tweet less one
-    oldest = alltweets[-1].id - 1
+    #save the id of the oldest tweet (zero indexed)
+    try:oldest = alltweets[-1].id - 1
+    except IndexError as e:
+        print("[ERROR] You are not following, or have access to the account {0}".format(screen_name))
+        raise e
 
     #keep grabbing tweets until there are no tweets left to grab
     while len(new_tweets) > 0:

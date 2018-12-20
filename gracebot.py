@@ -2,7 +2,7 @@
 import random
 import sys
 
-def generateSentence(screen_name, seedword = "my"):
+def generateSentence(screen_name, seedword = "my", times = 10, maxwords = 1000):
     with open("./{0}/{0}_tweets.txt".format(screen_name), "r", encoding='utf-8') as file:
         lines = file.read().lower()
     # Split by <EOS> end of string
@@ -10,8 +10,8 @@ def generateSentence(screen_name, seedword = "my"):
     # Get rid of <SOS> start of string
     payload = [txt[5:] for txt in payload]
     grdic = makedic(payload)
-    for _ in range(10):
-        makeSentence(grdic,seedword,10)
+    for _ in range(times):
+        makeSentence(grdic,seedword, maxwords)
         print()
 
 def makedic(payload):
@@ -27,11 +27,12 @@ def makedic(payload):
                 grdic[word] = {nxtword:1}
     return grdic
 
-def makeSentence(grdic, startseed, notimes):
+def makeSentence(grdic, startseed, numwords):
     # Makes full sentence
     sys.stdout.write(startseed)
     newseedword = takeLastWordAndPredict(grdic,startseed)
-    for _ in range(notimes):
+    climb = 0
+    while(climb < numwords):
         newseedword = takeLastWordAndPredict(grdic,newseedword)
         if newseedword == "<WNF>":
             sys.stdout.write(".")
@@ -40,6 +41,7 @@ def makeSentence(grdic, startseed, notimes):
             sys.stdout.write(" ")
             try:sys.stdout.write(newseedword)
             except:sys.stdout.write("*emoji*")
+        climb += 1
     else: #If `break;` isn't hit
         sys.stdout.write(".")
 
