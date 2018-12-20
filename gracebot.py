@@ -14,10 +14,10 @@ def generateSentence(screen_name, seedword = "my", times = 10, maxwords = 1000):
         makeSentence(grdic,seedword, maxwords)
         print()
 
-def makedic(payload):
+def makedic(payload, key_length = 2):
     grdic = {}
     for line in payload:
-        for word,nxtword in window(line.split(),2):
+        for word,nxtword in window(line.split(), key_length):
             if word in grdic:
                 if nxtword in grdic[word]:
                     grdic[word][nxtword]+=1
@@ -27,10 +27,16 @@ def makedic(payload):
                 grdic[word] = {nxtword:1}
     return grdic
 
+def printOptions(grdic, inp):
+    print(inp)
+    for ind,(key,value) in enumerate(grdic[inp].items()):
+        sys.stdout.write(key + " ")
+        
 def makeSentence(grdic, startseed, numwords):
     # Makes full sentence
     sys.stdout.write(startseed)
     newseedword = takeLastWordAndPredict(grdic,startseed)
+    sys.stdout.write(" " + newseedword)
     climb = 0
     while(climb < numwords):
         newseedword = takeLastWordAndPredict(grdic,newseedword)
@@ -50,9 +56,9 @@ def takeLastWordAndPredict(dic,word):
     if word.lower() not in dic:
         return "<WNF>"
     probdic = []
-    for i in list(dic[word].items()):
-        for _ in range(i[1]):
-            probdic.append(i[0])
+    for nxtword, uses in dic[word].items():
+        for _ in range(uses):
+            probdic.append(nxtword)
     nxtwordind = random.randint(0,len(probdic)-1)
     return probdic[nxtwordind]
 
