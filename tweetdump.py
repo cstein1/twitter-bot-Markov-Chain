@@ -16,7 +16,7 @@ def get_all_tweets(screen_name, consumer_key, consumer_secret, access_key, acces
     alltweets = []
 
     #make initial request for most recent tweets (200 is the maximum allowed count)
-    new_tweets = api.user_timeline(screen_name = screen_name,count=200)
+    new_tweets = api.user_timeline(screen_name = screen_name, count=200)
 
     #save most recent tweets
     alltweets.extend(new_tweets)
@@ -39,10 +39,7 @@ def get_all_tweets(screen_name, consumer_key, consumer_secret, access_key, acces
 
         print( "...%s tweets downloaded so far" % (len(alltweets)))
 
-        #outtweets = [tweet.text.encode("utf-8") for tweet in alltweets]
-
-    # longestString = 0
-    f = open("%s_tweets.txt" % screen_name, "wb")
+    f = open("./{0}/{0}_tweets.txt".format(screen_name), "wb")
     for (ind,i) in enumerate(alltweets):
         tmp = ""
         try:

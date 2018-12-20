@@ -3,7 +3,7 @@ import random
 import sys
 
 def generateSentence(screen_name, seedword = "my"):
-    with open(screen_name + "_tweets.txt", "r", encoding='utf-8') as file:
+    with open("./{0}/{0}_tweets.txt".format(screen_name), "r", encoding='utf-8') as file:
         lines = file.read().lower()
     # Split by <EOS> end of string
     payload = lines.split("<eos>")
