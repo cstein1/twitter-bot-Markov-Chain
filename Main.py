@@ -5,12 +5,14 @@ import sys
 import tweetdump
 import gracebot
 
-def main(screen_name, renew_tweet_dump, num_times, seed_word, max_words_per_sentence):
-    consumer_key =
-    consumer_secret =
-    access_key =
-    access_secret =
 
+consumer_key =
+consumer_secret =
+access_key =
+access_secret =
+
+
+def main(screen_name, renew_tweet_dump, num_times, seed_word, max_words_per_sentence):
     if not os.path.exists("./{0}".format(screen_name)):
         os.mkdir("./{0}".format(screen_name))
     if not os.path.exists("{0}/{0}_tweets.txt".format(screen_name)) or renew_tweet_dump:
@@ -18,10 +20,6 @@ def main(screen_name, renew_tweet_dump, num_times, seed_word, max_words_per_sent
     gracebot.generateSentence(screen_name = screen_name, seedword = seed_word, times = num_times, max_words_per_sentence = max_words_per_sentence)
 
 def justDownload(screen_name):
-    consumer_key =
-    consumer_secret =
-    access_key =
-    access_secret = 
     if not os.path.exists("./{0}".format(screen_name)):
         os.mkdir("./{0}".format(screen_name))
     tweetdump.get_all_tweets(screen_name, consumer_key, consumer_secret, access_key, access_secret)
