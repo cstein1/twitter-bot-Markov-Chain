@@ -5,7 +5,8 @@ import sys
 # Helper function that creates the main dictionary, then generates a sentence in style of screen_name
 # param seedword: Seedword is inspiring word that must exist in user's vocabulary
 # param max_words_per_sentence: Most words allowed in output
-def generateSentence(screen_name, seedword = "my", max_words_per_sentence = 1000):
+# param max_chars: Most characters allowed
+def generateSentence(screen_name, seedword = "my", max_words_per_sentence = 1000,  max_chars = 280):
     with open("./{0}/{0}_tweets.txt".format(screen_name), "r", encoding='utf-8') as file:
         lines = file.read().lower()
     # Split by <EOS> end of string
@@ -13,7 +14,7 @@ def generateSentence(screen_name, seedword = "my", max_words_per_sentence = 1000
     # Get rid of <SOS> start of string
     payload = [txt[5:] for txt in payload]
     grdic = makedic(payload)
-    return makeSentence(grdic,seedword, max_words_per_sentence)
+    return makeSentence(screen_name, grdic,seedword, max_words_per_sentence, max_chars)
 
 # Creates a dictionary of {`word`: dictionary of {`next_word` following `word` : number times found after `word`}}
 # param payload: List of tweets
@@ -34,17 +35,19 @@ def makedic(payload, key_length = 2):
 # Creates a sentence by looping def takeLastWordAndPredict
 # Return <WNF> if word has not been used in any tweet by user
 # Return sentence_out: sentence returned
+# param screen_name: Screen name of style of subject
 # param grdic: Dictionary from def makedic
 # param startseed: Seed word
 # param numwords: Max number of words in sentence
-def makeSentence(grdic, startseed, numwords):
-    sentence_out = startseed
+# param  max_chars: Max number of characters allowed
+def makeSentence(screen_name, grdic, startseed, numwords, max_chars):
+    sentence_out = "@{0} ".format(screen_name) + startseed
     newseedword = takeLastWordAndPredict(grdic,startseed)
     sentence_out += " " + newseedword
     climb = 0
-    while(climb < numwords):
+    while(climb < numwords and len(sentence_out) < max_chars-1):
         newseedword = takeLastWordAndPredict(grdic,newseedword)
-        if newseedword == "<WNF>":
+        if newseedword == "<WNF>" or len(sentence_out) + len(newseedword) >= max_chars:
             sentence_out += "."
             break;
         else:
