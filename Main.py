@@ -5,23 +5,24 @@ import sys
 import tweetdump
 import gracebot
 
-
+# You need to visit developer.twitter.com to get your own information
+# Crteate your own app to play with this program
 consumer_key =
 consumer_secret =
 access_key =
 access_secret =
 
 def main(screen_name, renew_tweet_dump, num_times, seed_word, max_words_per_sentence):
-    handler = tweetdump.TwitterHandler()
-    preProcess(screen_name, renew_tweet_dump, num_times, seed_word, max_words_per_sentence)
+    handler = tweetdump.TwitterHandler(screen_name, consumer_key, consumer_secret, access_key, access_secret)
+    preProcess(handler, renew_tweet_dump, num_times, seed_word, max_words_per_sentence)
     tweet = gracebot.generateSentence(screen_name = screen_name, seedword = seed_word, max_words_per_sentence = max_words_per_sentence)
     handler.update_status(status = tweet)
 
 # Makes appropriate folders and files
-def preProcess(screen_name, renew_tweet_dump, num_times, seed_word, max_words_per_sentence):
-    if not os.path.exists("./{0}".format(screen_name)):
-        os.mkdir("./{0}".format(screen_name))
-    if not os.path.exists("{0}/{0}_tweets.txt".format(screen_name)) or renew_tweet_dump:
+def preProcess(handler, renew_tweet_dump, num_times, seed_word, max_words_per_sentence):
+    if not os.path.exists("./{0}".format(handler.screen_name)):
+        os.mkdir("./{0}".format(handler.screen_name))
+    if not os.path.exists("{0}/{0}_tweets.txt".format(handler.screen_name)) or renew_tweet_dump:
         tweetdump.get_all_tweets(screen_name, handler.consumer_key, handler.consumer_secret, handler.access_key, handler.access_secret)
 
 # Do not tweet: print to command line instead
