@@ -5,7 +5,6 @@ import sys
 import tweetdump
 import gracebot
 
-
 def main(screen_name, renew_tweet_dump, num_times, seed_word, max_words_per_sentence):
     consumer_key =
     consumer_secret =
@@ -27,7 +26,6 @@ def justDownload(screen_name):
         os.mkdir("./{0}".format(screen_name))
     tweetdump.get_all_tweets(screen_name, consumer_key, consumer_secret, access_key, access_secret)
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--renew_tweet_dump", help="Re[d]ownloads all tweets from given username, then proceeds to generate new tweets", action="store_true")
@@ -37,7 +35,6 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--seed_word", help="The [s]eed word to generate sentence from", type=str)
     parser.add_argument("-j", "--just_download", help="[J]ust download the entire feed of username specified with -s flag", action="store_true")
     args = parser.parse_args()
-
 
     if args.screen_name:
         screen_name = args.screen_name
@@ -53,7 +50,6 @@ if __name__ == "__main__":
         renew_tweet_dump = args.renew_tweet_dump
     else:
         renew_tweet_dump = False
-
 
     if args.number_generations:
         num_times = args.number_generations
