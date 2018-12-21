@@ -17,6 +17,8 @@ def main(screen_name, renew_tweet_dump, num_times, seed_word, max_words_per_sent
     preProcess(handler, renew_tweet_dump, num_times, seed_word, max_words_per_sentence)
     tweet = gracebot.generateSentence(screen_name = screen_name, seedword = seed_word, max_words_per_sentence = max_words_per_sentence, max_chars = 280)
     handler.update_status(status = tweet)
+    print("Tweeted Successfully. Exiting...")
+    sys.exit(0)
 
 # Makes appropriate folders and files
 def preProcess(handler, renew_tweet_dump, num_times, seed_word, max_words_per_sentence):
@@ -57,7 +59,7 @@ if __name__ == "__main__":
 
     if args.just_download:
         justDownload(screen_name)
-        sys.exit(0)
+        sys.exit(2)
 
     if args.renew_tweet_dump:
         renew_tweet_dump = args.renew_tweet_dump
@@ -84,6 +86,6 @@ if __name__ == "__main__":
 
     if args.local_print:
         printToCommandLine(screen_name = screen_name, renew_tweet_dump = renew_tweet_dump, num_times = num_times, seed_word = seed_word, max_words_per_sentence= max_words_per_sentence)
-        sys.exit(0)
+        sys.exit(2)
 
     main(screen_name = screen_name, renew_tweet_dump = renew_tweet_dump, num_times = num_times, seed_word = seed_word, max_words_per_sentence= max_words_per_sentence)
