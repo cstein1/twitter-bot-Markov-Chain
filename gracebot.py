@@ -2,7 +2,7 @@
 import random
 import sys
 
-def generateSentence(screen_name, seedword = "my", times = 10, maxwords = 1000):
+def generateSentence(screen_name, seedword = "my", times = 10, max_words_per_sentence = 1000):
     with open("./{0}/{0}_tweets.txt".format(screen_name), "r", encoding='utf-8') as file:
         lines = file.read().lower()
     # Split by <EOS> end of string
@@ -12,7 +12,7 @@ def generateSentence(screen_name, seedword = "my", times = 10, maxwords = 1000):
     grdic = makedic(payload)
     print()
     for _ in range(times):
-        makeSentence(grdic,seedword, maxwords)
+        makeSentence(grdic,seedword, max_words_per_sentence)
         print("\n")
 
 def makedic(payload, key_length = 2):
