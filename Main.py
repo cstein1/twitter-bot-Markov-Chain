@@ -11,15 +11,26 @@ consumer_secret =
 access_key =
 access_secret =
 
-
 def main(screen_name, renew_tweet_dump, num_times, seed_word, max_words_per_sentence):
+    handler = tweetdump.TwitterHandler()
+    preProcess(screen_name, renew_tweet_dump, num_times, seed_word, max_words_per_sentence)
+    tweet = gracebot.generateSentence(screen_name = screen_name, seedword = seed_word, max_words_per_sentence = max_words_per_sentence)
+    handler.update_status(status = tweet)
+
+# Makes appropriate folders and files
+def preProcess(screen_name, renew_tweet_dump, num_times, seed_word, max_words_per_sentence):
     if not os.path.exists("./{0}".format(screen_name)):
         os.mkdir("./{0}".format(screen_name))
     if not os.path.exists("{0}/{0}_tweets.txt".format(screen_name)) or renew_tweet_dump:
-        tweetdump.get_all_tweets(screen_name, consumer_key, consumer_secret, access_key, access_secret)
-    for _ in range(num_times):
-        gracebot.generateSentence(screen_name = screen_name, seedword = seed_word, max_words_per_sentence = max_words_per_sentence)
+        tweetdump.get_all_tweets(screen_name, handler.consumer_key, handler.consumer_secret, handler.access_key, handler.access_secret)
 
+# Do not tweet: print to command line instead
+def printToCommandLine(screen_name, renew_tweet_dump, num_times, seed_word, max_words_per_sentence):
+    preProcess(screen_name, renew_tweet_dump, num_times, seed_word, max_words_per_sentence)
+    for _ in range(num_times):
+        print(gracebot.generateSentence(screen_name = screen_name, seedword = seed_word, max_words_per_sentence = max_words_per_sentence))
+
+# Do not tweet: download the tweets only
 def justDownload(screen_name):
     if not os.path.exists("./{0}".format(screen_name)):
         os.mkdir("./{0}".format(screen_name))
@@ -33,6 +44,7 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--max_words_per_sentence", help="The [m]aximum number of words per sentence generation", type=int, default=1000)
     parser.add_argument("-s", "--seed_word", help="The [s]eed word to generate sentence from", type=str)
     parser.add_argument("-j", "--just_download", help="[J]ust download the entire feed of username specified with -s flag", action="store_true")
+    parser.add_argument("-l", "--local_print", help="Print to the [l]ocal command line. USE THIS IF YOU DO NOT WANT TO TWEET.", action="store_true")
     args = parser.parse_args()
 
     if args.screen_name:
@@ -67,5 +79,9 @@ if __name__ == "__main__":
     else:
         print("Error with -m, --max_words_per_sentence flag. See -h for usage.")
         sys.exit(1)
+
+    if args.local_print:
+        printToCommandLine(screen_name = screen_name, renew_tweet_dump = renew_tweet_dump, num_times = num_times, seed_word = seed_word, max_words_per_sentence= max_words_per_sentence)
+        sys.exit(0)
 
     main(screen_name = screen_name, renew_tweet_dump = renew_tweet_dump, num_times = num_times, seed_word = seed_word, max_words_per_sentence= max_words_per_sentence)
