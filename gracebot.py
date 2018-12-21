@@ -13,7 +13,7 @@ def generateSentence(screen_name, seedword = "my", max_words_per_sentence = 1000
     # Get rid of <SOS> start of string
     payload = [txt[5:] for txt in payload]
     grdic = makedic(payload)
-    makeSentence(grdic,seedword, max_words_per_sentence)
+    return makeSentence(grdic,seedword, max_words_per_sentence)
 
 # Creates a dictionary of {`word`: dictionary of {`next_word` following `word` : number times found after `word`}}
 # param payload: List of tweets
@@ -33,26 +33,29 @@ def makedic(payload, key_length = 2):
 
 # Creates a sentence by looping def takeLastWordAndPredict
 # Return <WNF> if word has not been used in any tweet by user
+# Return sentence_out: sentence returned
 # param grdic: Dictionary from def makedic
 # param startseed: Seed word
 # param numwords: Max number of words in sentence
 def makeSentence(grdic, startseed, numwords):
-    sys.stdout.write(startseed)
+    sentence_out = startseed
     newseedword = takeLastWordAndPredict(grdic,startseed)
-    sys.stdout.write(" " + newseedword)
+    sentence_out += " " + newseedword
     climb = 0
     while(climb < numwords):
         newseedword = takeLastWordAndPredict(grdic,newseedword)
         if newseedword == "<WNF>":
-            sys.stdout.write(".")
+            sentence_out += "."
             break;
         else:
-            sys.stdout.write(" ")
-            try:sys.stdout.write(newseedword)
-            except:sys.stdout.write("*emoji*")
+            sentence_out += " "
+            try:sentence_out += newseedword
+            except:sentence_out += "<EMJ>"
+            # On failure, probably emoji... so <EMJ>
         climb += 1
     else: #If `break;` isn't hit
-        sys.stdout.write(".")
+        sentence_out += "."
+    return sentence_out
 
 # Creates a probability list to sample from. For each instance of a `nxtword` following input `word` that is found,
 #  create an entry in `probdic`. Then sample the whole list for the chosen next word.
