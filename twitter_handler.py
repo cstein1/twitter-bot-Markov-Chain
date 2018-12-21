@@ -26,6 +26,32 @@ class TwitterHandler:
     def update_status(self, status):
         self.api.update_status(status = status)
 
+    # TODO: instead of passing tweet, pass controversial word
+    def inform_error(self, tweet):
+        text = '''
+        Thanks for submitting a tweet to me.\n
+        Unfortunately, the seed you sent me is not a word you have used before.
+        Try another word for now, please.
+        DISCLAIMER: I do not store any information about you. I also only access public information.
+        '''
+        user = self.api.get_user(self.screen_name)
+        event = {
+          "event": {
+            "type": "message_create",
+            "message_create": {
+              "target": {
+                "recipient_id": user.id
+              },
+              "message_data": {
+                "text": text
+              }
+            }
+          }
+        }
+        print("Failed to tweet to {0}. TODO: Now sending direct message to user ID {1}.".format(self.screen_name, user.id))
+        print("Exiting...")
+        #self.api.send_direct_message_new(event)
+
     def get_all_tweets(self):
         #initialize a list to hold all the tweepy Tweets
         alltweets = []
