@@ -55,3 +55,6 @@ We sample *grdic["walk"]* and find "was."
 *grdic["good"]* does not exist, so our output will be "walk was good."
 
 Sampling the inner-dictionary, found in *gracebot.takeLastWordAndPredict(_)* will create a distribution of the inner-keys and choose an inner-key with probability *inner-key's value/sum of inner-keys' values*
+
+# Usage
+TODO. Message me directly for questions
