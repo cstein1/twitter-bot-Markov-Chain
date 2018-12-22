@@ -6,7 +6,7 @@ Go there to get access to tweepy
 The process begins in [twitter_handler.py](https://github.com/cstein1/twitter-bot-Markov-Chain/blob/master/twitter_handler.py).
 The class TwitterHandler deals with all of the Twitter API interactions via python package [tweepy](https://github.com/tweepy/tweepy).
 The only thing that is required from the user to interact with Twitter is consumer tokens and accessor tokens for a [Twitter app](https://developer.twitter.com/). Those tokens should be placed in the empty strings in [Main.py](https://github.com/cstein1/twitter-bot-Markov-Chain/blob/master/Main.py), and the authentication and such is handled for the user in [twitter_handler.py](https://github.com/cstein1/twitter-bot-Markov-Chain/blob/master/twitter_handler.py).
-The function *TwitterHandler.get_all_tweets()* will grab all tweets from a given user under *TwitterHandler.screen_name*, and compile them into a single text file. Each tweet begins with "<SOS>" (start of string) and ends with "<EOS>" (end of string).
+The function *TwitterHandler.get_all_tweets()* will grab all tweets from a given user under *TwitterHandler.screen_name*, and compile them into a single text file. Each tweet begins with ```<SOS>``` (start of string) and ends with ```<EOS>``` (end of string).
   
 ## Guiding Structure
 [gracebot.py](https://github.com/cstein1/twitter-bot-Markov-Chain/blob/master/gracebot.py) holds the guiding structure of the string generation algorithm.
@@ -21,6 +21,7 @@ Example Tweets:
  
 Corresponding Example Dictionary:
 
+```
 {
 
  "I" : {"enjoyed : 2, "thought" : 1},
@@ -36,6 +37,7 @@ Corresponding Example Dictionary:
  "was" : {"good" : 1}
  
  }
+ ```
  
  Example Inspection:
  "enjoyed" followed "I" twice, so *grdic["I"]["enjoyed"]=2*.
