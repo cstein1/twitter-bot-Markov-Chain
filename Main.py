@@ -2,6 +2,7 @@ import os
 import argparse
 import sys
 
+import tweepy
 import twitter_handler
 import gracebot
 
@@ -12,9 +13,9 @@ consumer_secret = ""
 access_key = ""
 access_secret = ""
 
-def main(screen_name, renew_tweet_dump, num_times, seed_word, max_words_per_sentence, print_to_CL, show_dic):
-    handler = twitter_handler.TwitterHandler(screen_name, consumer_key, consumer_secret, access_key, access_secret)
-    preProcess(handler, renew_tweet_dump)
+def tweet_once(screen_name, renew_tweet_dump, num_times, seed_word, max_words_per_sentence, print_to_CL, show_dic):
+    handler = twitter_handler.TwitterHandler(consumer_key, consumer_secret, access_key, access_secret)
+    preProcess(handler, screen_name, renew_tweet_dump)
     tweet = gracebot.generateSentence(screen_name = screen_name, seedword = seed_word, max_words_per_sentence = max_words_per_sentence, max_chars = 280, show_dic = show_dic)
     if print_to_CL:
         print(tweet)
@@ -24,21 +25,58 @@ def main(screen_name, renew_tweet_dump, num_times, seed_word, max_words_per_sent
     sys.exit(0)
 
 # Makes appropriate folders and files
-def preProcess(handler, renew_tweet_dump):
-    if not os.path.exists("./{0}".format(handler.screen_name)):
-        os.mkdir("./{0}".format(handler.screen_name))
-    if not os.path.exists("{0}/{0}_tweets.txt".format(handler.screen_name)) or renew_tweet_dump:
+def preProcess(handler, screen_name, renew_tweet_dump):
+    if not os.path.exists("./{0}".format(screen_name)):
+        os.mkdir("./{0}".format(screen_name))
+    if not os.path.exists("{0}/{0}_tweets.txt".format(screen_name)) or renew_tweet_dump:
         handler.get_all_tweets()
 
 # Do not tweet: download the tweets only
 def justDownload(screen_name):
-    handler = twitter_handler.TwitterHandler(screen_name, consumer_key, consumer_secret, access_key, access_secret)
+    handler = twitter_handler.TwitterHandler(consumer_key, consumer_secret, access_key, access_secret)
     if not os.path.exists("./{0}".format(screen_name)):
         os.mkdir("./{0}".format(screen_name))
     handler.get_all_tweets()
 
+
+def listen():
+    print("Setting up stream")
+    class StdOutListener(tweepy.streaming.StreamListener):
+        """ A listener handles tweets that are received from the stream.
+        This is a basic listener that just prints received tweets to stdout.
+        """
+        def on_data(self, data):
+            print("Heard call")
+            split_data = data.split()
+            cursor = 0
+            while("ubot" not in split_data[cursor]):
+                cursor += 1
+                if cursor >= len(split_data):
+                    return True
+            tweet_once(data.user.screen_name, True, 1, split_data[cursor], 1000, False, False)
+            print("Tweeted")
+            return True
+
+        def on_status(self, status):
+            # Prints the text of the tweet
+            print('Tweet text: ' + status.text)
+            return True
+
+        def on_error(self, status):
+            print(status)
+
+    handler = twitter_handler.TwitterHandler(consumer_key, consumer_secret, access_key, access_secret)
+    l = StdOutListener()
+    stream = tweepy.Stream(handler.auth, l)
+
+    friends = [fr for fr in handler.api.me().followers()]
+    friend_id = [fr.id_str for fr in friends]
+    stream.filter(follow = friend_id, track=['#ubot','ubot','@uBOT13','uBOT13'])
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--stream", help="Listen to updates and respond in Twitter!",
+                        action="store_true", default=False)
     parser.add_argument("-d", "--renew_tweet_dump",
                         help="Re[d]ownloads all tweets from given username, then proceeds to generate new tweets",
                         action="store_true", default=False)
@@ -59,6 +97,11 @@ if __name__ == "__main__":
                         action="store_true", default=False)
     parser.add_argument("--show_dic", help="Print the dictionary and exit.", action="store_true", default=False)
     args = parser.parse_args()
+
+    if args.stream:
+        sys.stdout.write("Setting up stream\n")
+        listen()
+        sys.exit(0)
 
     if args.screen_name:
         screen_name = args.screen_name
@@ -93,4 +136,4 @@ if __name__ == "__main__":
     renew_tweet_dump = args.renew_tweet_dump
     show_dic = args.show_dic
 
-    main(screen_name = screen_name, renew_tweet_dump = renew_tweet_dump, num_times = num_times, seed_word = seed_word, max_words_per_sentence= max_words_per_sentence, print_to_CL = local_print, show_dic = show_dic)
+    tweet_once(screen_name = screen_name, renew_tweet_dump = renew_tweet_dump, num_times = num_times, seed_word = seed_word, max_words_per_sentence= max_words_per_sentence, print_to_CL = local_print, show_dic = show_dic)

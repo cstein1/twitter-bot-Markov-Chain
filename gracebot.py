@@ -44,7 +44,7 @@ def makedic(payload, key_length = 2):
 # param numwords: Max number of words in sentence
 # param  max_chars: Max number of characters allowed
 def makeSentence(screen_name, grdic, startseed, numwords, max_chars):
-    sentence_out = "@{0} ".format(screen_name) + startseed
+    sentence_out = ".@{0} ".format(screen_name) + startseed
     newseedword = takeLastWordAndPredict(grdic,startseed)
     sentence_out += " " + newseedword
     climb = 0

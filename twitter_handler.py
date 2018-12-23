@@ -4,13 +4,13 @@
 import tweepy #https://github.com/tweepy/tweepy
 import csv
 import re
+from tweepy.streaming import StreamListener
 
 class TwitterHandler:
-    api = None;screen_name = None;consumer_key = None;
-    consumer_secret = None;access_key = None;access_secret = None
+    api = None; consumer_key = None;
+    consumer_secret = None; access_key = None; access_secret = None
 
-    def __init__(self, screen_name, consumer_key, consumer_secret, access_key, access_secret):
-        self.screen_name = screen_name
+    def __init__(self, consumer_key, consumer_secret, access_key, access_secret):
         self.consumer_key = consumer_key
         self.consumer_secret = consumer_secret
         self.access_key = access_key
@@ -18,13 +18,16 @@ class TwitterHandler:
         self.authorize()
 
     def authorize(self):
-        #authorize twitter, initialize tweepy
-        auth = tweepy.OAuthHandler(self.consumer_key, self.consumer_secret)
-        auth.set_access_token(self.access_key, self.access_secret)
-        self.api = tweepy.API(auth)
+        print("authenticating...")
+        self.auth = tweepy.OAuthHandler(self.consumer_key, self.consumer_secret)
+        self.auth.set_access_token(self.access_key, self.access_secret)
+        self.api = tweepy.API(self.auth)
 
     def update_status(self, status):
         self.api.update_status(status = status)
+
+
+
 
     # TODO: instead of passing tweet, pass controversial word
     def inform_error(self, tweet):
@@ -50,7 +53,8 @@ class TwitterHandler:
         }
         print("Failed to tweet to {0}. TODO: Now sending direct message to user ID {1}.".format(self.screen_name, user.id))
         print("Exiting...")
-        #self.api.send_direct_message_new(event)
+        try:self.api.send_direct_message(event)
+        except:print("Not functional yet")
 
     def get_all_tweets(self):
         #initialize a list to hold all the tweepy Tweets
