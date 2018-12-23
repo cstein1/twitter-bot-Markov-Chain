@@ -6,7 +6,7 @@ import sys
 # param seedword: Seedword is inspiring word that must exist in user's vocabulary
 # param max_words_per_sentence: Most words allowed in output
 # param max_chars: Most characters allowed
-def generateSentence(screen_name, seedword = "my", max_words_per_sentence = 1000,  max_chars = 280):
+def generateSentence(screen_name, seedword = "my", max_words_per_sentence = 1000,  max_chars = 280, show_dic = False):
     with open("./{0}/{0}_tweets.txt".format(screen_name), "r", encoding='utf-8') as file:
         lines = file.read().lower()
     # Split by <EOS> end of string
@@ -14,7 +14,10 @@ def generateSentence(screen_name, seedword = "my", max_words_per_sentence = 1000
     # Get rid of <SOS> start of string
     payload = [txt[5:] for txt in payload]
     grdic = makedic(payload)
-    return makeSentence(screen_name, grdic,seedword, max_words_per_sentence, max_chars)
+    if show_dic:
+        printOptions(grdic, seedword)
+        sys.exit(2)
+    return makeSentence(screen_name, grdic, seedword, max_words_per_sentence, max_chars)
 
 # Creates a dictionary of {`word`: dictionary of {`next_word` following `word` : number times found after `word`}}
 # param payload: List of tweets
@@ -48,7 +51,6 @@ def makeSentence(screen_name, grdic, startseed, numwords, max_chars):
     while(climb < numwords and len(sentence_out) < max_chars-1):
         newseedword = takeLastWordAndPredict(grdic,newseedword)
         if newseedword == "<WNF>" or len(sentence_out) + len(newseedword) >= max_chars:
-            sentence_out += "."
             break;
         else:
             sentence_out += " "
@@ -56,7 +58,7 @@ def makeSentence(screen_name, grdic, startseed, numwords, max_chars):
             except:sentence_out += "<EMJ>"
             # On failure, probably emoji... so <EMJ>
         climb += 1
-    else: #If `break;` isn't hit
+    if sentence_out[-1] not in ["!",".","?"]:
         sentence_out += "."
     return sentence_out
 
@@ -84,7 +86,7 @@ def window(iterator, window_width):
 def printOptions(grdic, inp):
     print(inp)
     for ind,(key,value) in enumerate(grdic[inp].items()):
-        sys.stdout.write(key + " ")
+        sys.stdout.write(key + ": " + str(value) + " | ")
 
 def printNestedDic(dic):
     for key, indic in dic.items():
