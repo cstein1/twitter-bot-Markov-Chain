@@ -7,8 +7,9 @@ import re
 from tweepy.streaming import StreamListener
 
 class TwitterHandler:
-    api = None; consumer_key = None;
-    consumer_secret = None; access_key = None; access_secret = None
+    api = None; latest_tweet = None
+    consumer_key = None; consumer_secret = None; access_key = None; access_secret = None
+
 
     def __init__(self, consumer_key, consumer_secret, access_key, access_secret):
         self.consumer_key = consumer_key
@@ -18,16 +19,13 @@ class TwitterHandler:
         self.authorize()
 
     def authorize(self):
-        print("authenticating...")
+        print("[twitter_handler.authorize] Checking credentials...")
         self.auth = tweepy.OAuthHandler(self.consumer_key, self.consumer_secret)
         self.auth.set_access_token(self.access_key, self.access_secret)
         self.api = tweepy.API(self.auth)
 
     def update_status(self, status):
         self.api.update_status(status = status)
-
-
-
 
     # TODO: instead of passing tweet, pass controversial word
     def inform_error(self, tweet):
@@ -56,6 +54,25 @@ class TwitterHandler:
         try:self.api.send_direct_message(event)
         except:print("Not functional yet")
 
+    def grab_latest_mentions(self):
+        me = self.api.me()
+        if not self.latest_tweet:
+            new_tweet = self.api.mentions_timeline(count = 1)
+            self.latest_tweet =new_tweet[0]
+            return [(self.latest_tweet.user.screen_name, self.latest_tweet.text)]
+
+        oldest = self.latest_tweet.id -1
+        new_tweets = self.api.mentions_timeline(since_id = oldest)
+        if self.latest_tweet.id == new_tweets[-1].id:
+            return None
+        aggregate = new_tweets
+        while len(new_tweets)>0:
+            new_tweets = self.api.mentions_timeline(since_id = oldest)
+            aggregate.append(new_tweets)
+            oldest = new_tweets[-1].id -1
+        self.latest_tweet = aggregate[-1]
+        return [(new_tweet.user.screen_name, new_tweet.text) for new_tweet in aggregate]
+
     def get_all_tweets(self, screen_name):
         #initialize a list to hold all the tweepy Tweets
         alltweets = []
@@ -69,7 +86,7 @@ class TwitterHandler:
         #save the id of the oldest tweet (zero indexed)
         try:oldest = alltweets[-1].id - 1
         except IndexError as e:
-            print("[ERROR] You are not following, or have access to the account {0}".format(self.screen_name))
+            print("[ERROR] You are not following, or have access to the account {0}".format(screen_name))
             raise e
 
         #keep grabbing tweets until there are no tweets left to grab
@@ -77,7 +94,7 @@ class TwitterHandler:
             print("getting tweets before %s" % (oldest))
 
             #all subsiquent requests use the max_id param to prevent duplicates
-            new_tweets = self.api.user_timeline(screen_name = screen_name,count=200,max_id=oldest)
+            new_tweets = self.api.user_timeline(screen_name = screen_name,count=200,max_id=oldest, tweet_mode='extended')
 
             #save most recent tweets
             alltweets.extend(new_tweets)
