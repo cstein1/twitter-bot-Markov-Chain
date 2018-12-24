@@ -29,14 +29,14 @@ def preProcess(handler, screen_name, renew_tweet_dump):
     if not os.path.exists("./{0}".format(screen_name)):
         os.mkdir("./{0}".format(screen_name))
     if not os.path.exists("{0}/{0}_tweets.txt".format(screen_name)) or renew_tweet_dump:
-        handler.get_all_tweets()
+        handler.get_all_tweets(screen_name)
 
 # Do not tweet: download the tweets only
 def justDownload(screen_name):
     handler = twitter_handler.TwitterHandler(consumer_key, consumer_secret, access_key, access_secret)
     if not os.path.exists("./{0}".format(screen_name)):
         os.mkdir("./{0}".format(screen_name))
-    handler.get_all_tweets()
+    handler.get_all_tweets(screen_name)
 
 
 def listen():
@@ -45,25 +45,47 @@ def listen():
         """ A listener handles tweets that are received from the stream.
         This is a basic listener that just prints received tweets to stdout.
         """
-        def on_data(self, data):
+
+        def on_connect(self):
+            print("Connection to server: success")
+            return True
+
+        def on_status(self, status):
             print("Heard call")
-            split_data = data.split()
+            try:print(status.text)
+            except:print("no1")
+            try:print(status.text())
+            except:print("no2")
+            try:print(data)
+            except:print("no3")
+            split_data = status.text.lower().split()
             cursor = 0
             while("ubot" not in split_data[cursor]):
                 cursor += 1
                 if cursor >= len(split_data):
                     return True
-            tweet_once(data.user.screen_name, True, 1, split_data[cursor], 1000, False, False)
-            print("Tweeted")
+            try:
+                tweet_once(screen_name = data.user.screen_name,
+                           renew_tweet_dump = True,
+                           num_times = 1,
+                           seed_word = split_data[cursor],
+                           max_words_per_sentence = 1000,
+                           print_to_CL = False,
+                           show_dic = False)
+                print("Tweeted")
+            except:
+                print("failed to tweet")
             return True
 
-        def on_status(self, status):
-            # Prints the text of the tweet
-            print('Tweet text: ' + status.text)
+        def on_limit(self, track):
+            print(track)
             return True
-
         def on_error(self, status):
             print(status)
+            return True
+        def on_disconnect(self, notice):
+            print(notice)
+            return
 
     handler = twitter_handler.TwitterHandler(consumer_key, consumer_secret, access_key, access_secret)
     l = StdOutListener()
@@ -135,5 +157,7 @@ if __name__ == "__main__":
     local_print = args.local_print
     renew_tweet_dump = args.renew_tweet_dump
     show_dic = args.show_dic
+
+
 
     tweet_once(screen_name = screen_name, renew_tweet_dump = renew_tweet_dump, num_times = num_times, seed_word = seed_word, max_words_per_sentence= max_words_per_sentence, print_to_CL = local_print, show_dic = show_dic)

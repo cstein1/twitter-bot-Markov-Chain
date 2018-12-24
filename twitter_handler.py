@@ -56,12 +56,12 @@ class TwitterHandler:
         try:self.api.send_direct_message(event)
         except:print("Not functional yet")
 
-    def get_all_tweets(self):
+    def get_all_tweets(self, screen_name):
         #initialize a list to hold all the tweepy Tweets
         alltweets = []
 
         #make initial request for most recent tweets (200 is the maximum allowed count)
-        new_tweets = self.api.user_timeline(screen_name = self.screen_name, count=200)
+        new_tweets = self.api.user_timeline(screen_name = screen_name, count=200)
 
         #save most recent tweets
         alltweets.extend(new_tweets)
@@ -77,7 +77,7 @@ class TwitterHandler:
             print("getting tweets before %s" % (oldest))
 
             #all subsiquent requests use the max_id param to prevent duplicates
-            new_tweets = self.api.user_timeline(screen_name = self.screen_name,count=200,max_id=oldest)
+            new_tweets = self.api.user_timeline(screen_name = screen_name,count=200,max_id=oldest)
 
             #save most recent tweets
             alltweets.extend(new_tweets)
@@ -87,7 +87,7 @@ class TwitterHandler:
 
             print( "...%s tweets downloaded so far" % (len(alltweets)))
 
-        f = open("./{0}/{0}_tweets.txt".format(self.screen_name), "wb")
+        f = open("./{0}/{0}_tweets.txt".format(screen_name), "wb")
         for (ind,i) in enumerate(alltweets):
             tmp = ""
             try:
