@@ -2,12 +2,22 @@
 # encoding: utf-8
 
 import tweepy #https://github.com/tweepy/tweepy
-import csv
+import os
 import re
-from tweepy.streaming import StreamListener
+from datetime import datetime
+
+def log(txt, end = "\n"):
+    string = "[" +str(datetime.now())+"] " + txt + end
+    try:print(string)
+    except:print("Special character")
+    if not os.path.exists("log.txt"):
+        with open("log.txt", "x", encoding="utf-8") as f:
+            f.write("\n")
+    with open("log.txt", "a", encoding="utf-8") as f:
+        f.write(string)
 
 class TwitterHandler:
-    api = None; latest_tweet = None
+    api = None; latest_tweet = None; me = None
     consumer_key = None; consumer_secret = None; access_key = None; access_secret = None
 
 
@@ -17,6 +27,8 @@ class TwitterHandler:
         self.access_key = access_key
         self.access_secret = access_secret
         self.authorize()
+        self.me = self.api.me()
+        self.set_latest_tweet()
 
     def authorize(self):
         print("[twitter_handler.authorize] Checking credentials...")
@@ -54,24 +66,47 @@ class TwitterHandler:
         try:self.api.send_direct_message(event)
         except:print("Not functional yet")
 
-    def grab_latest_mentions(self):
-        me = self.api.me()
-        if not self.latest_tweet:
-            new_tweet = self.api.mentions_timeline(count = 1)
-            self.latest_tweet =new_tweet[0]
-            return [(self.latest_tweet.user.screen_name, self.latest_tweet.text)]
-
-        oldest = self.latest_tweet.id -1
-        new_tweets = self.api.mentions_timeline(since_id = oldest)
-        if self.latest_tweet.id == new_tweets[-1].id:
-            return None
+    def set_latest_tweet(self):
+        me = self.me
+        new_tweets = self.api.mentions_timeline()
+        oldest = new_tweets[-1].id -1
         aggregate = new_tweets
-        while len(new_tweets)>0:
-            new_tweets = self.api.mentions_timeline(since_id = oldest)
-            aggregate.append(new_tweets)
+        mentions_of_me = list(filter(lambda e: e.user.id != me.id, new_tweets))
+        count = 0
+        while len(new_tweets)>0 and len(mentions_of_me)==0:
+            log("API call init")
+            try:
+                new_tweets = self.api.mentions_timeline(max_id = oldest)
+            except:
+                log("Failed to retrieve first new tweet from feed. Let's die now.")
+                pass; #wait 15 minutes
+            for tweet in new_tweets:
+                log("\t{0}:\t{1}".format(str(tweet.user.screen_name),str(tweet.text)))
             oldest = new_tweets[-1].id -1
-        self.latest_tweet = aggregate[-1]
-        return [(new_tweet.user.screen_name, new_tweet.text) for new_tweet in aggregate]
+            mentions_of_me = list(filter(lambda e: e.user.id != me.id, new_tweets))
+            aggregate += mentions_of_me
+        self.latest_tweet = mentions_of_me[0] # tweet object
+        log("Latest tweet set")
+        log("\t\t\t{0}\t{1}".format(str(self.latest_tweet.user.screen_name), str(self.latest_tweet.text)))
+        return [(self.latest_tweet.user.screen_name, self.latest_tweet.text)]
+
+    def grab_latest_mentions(self):
+        me = self.me
+        oldest = self.latest_tweet.id
+        log("API call (first try)")
+        new_tweets = self.api.mentions_timeline(since_id = oldest)
+        if len(new_tweets) == 0:
+            return None
+        if self.latest_tweet.id == new_tweets[0].id:
+            return None
+        aggregate = []
+        while len(new_tweets)!=0:
+            log("API call (looping)", end = " ")
+            oldest = new_tweets[0].id
+            aggregate += new_tweets
+            new_tweets = self.api.mentions_timeline(since_id = oldest)
+        self.latest_tweet = aggregate[0]
+        return [(tweet.user.screen_name, tweet.text) for tweet in aggregate]
 
     def get_all_tweets(self, screen_name):
         #initialize a list to hold all the tweepy Tweets
@@ -113,8 +148,9 @@ class TwitterHandler:
                     tmp += re.sub(r"http\S+", "", str(i.text))
                     #if(len(tmp) > longestString): longestString = len(tmp)
                     tmp += "<EOS>"
-            except:
-                print("Encountered tweet with issue")
+            except Exception as e:
+                print(e)
+                log(i.text)
                 pass
             tmp = tmp.encode("utf-8")
             f.write(tmp)
