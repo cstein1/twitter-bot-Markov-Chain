@@ -73,13 +73,15 @@ def listen():
                 cursor = 0
                 while("ubot" in split_data[cursor]):
                     cursor += 1
-                if cursor < len(split_data):
+                if cursor < len(split_data) and name != "uBOT13":
                     log("Word '{0}' found. Now attempting to tweet to '{1}'.".format(str(split_data[cursor]), str(name)))
                     try:
                         tweet_once(screen_name = name, seed_word = split_data[cursor])
                         log("Tweet success!")
-                    except:
+                    except Exception as e:
                         log("Failed to tweet")
+                        log(str(e))
+                        log(str(traceback.format_exc()))
                 else:
                     log("No viable words found. Moving to sleep mode")
         time.sleep(60)

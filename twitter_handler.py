@@ -113,7 +113,7 @@ class TwitterHandler:
         alltweets = []
 
         #make initial request for most recent tweets (200 is the maximum allowed count)
-        new_tweets = self.api.user_timeline(screen_name = screen_name, count=200)
+        new_tweets = self.api.user_timeline(screen_name = screen_name, count=200, tweet_mode='extended')
 
         #save most recent tweets
         alltweets.extend(new_tweets)
@@ -143,14 +143,14 @@ class TwitterHandler:
         for (ind,i) in enumerate(alltweets):
             tmp = ""
             try:
-                if not i.text.startswith("RT",0,2):
+                if not i.full_text.startswith("RT",0,2):
                     tmp += "<SOS>"
-                    tmp += re.sub(r"http\S+", "", str(i.text))
+                    tmp += re.sub(r"http\S+", "", str(i.full_text))
                     #if(len(tmp) > longestString): longestString = len(tmp)
                     tmp += "<EOS>"
             except Exception as e:
                 print(e)
-                log(i.text)
+                log(i.full_text)
                 pass
             tmp = tmp.encode("utf-8")
             f.write(tmp)
