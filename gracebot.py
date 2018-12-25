@@ -48,7 +48,7 @@ def makeSentence(screen_name, grdic, startseed, numwords, max_chars):
     newseedword = takeLastWordAndPredict(grdic,startseed)
     sentence_out += " " + newseedword
     climb = 0
-    while(climb < numwords and len(sentence_out) < max_chars-1):
+    while(climb < numwords and len(sentence_out) < max_chars-2):
         newseedword = takeLastWordAndPredict(grdic,newseedword)
         if newseedword == "<WNF>" or len(sentence_out) + len(newseedword) >= max_chars:
             break;
